@@ -13,3 +13,4 @@ CREATE_TIME="$(date +%s)"
 export STORAGE_ACCOUNT_NAME="capi${CREATE_TIME}"
 az storage account create -n ${STORAGE_ACCOUNT_NAME} -g ${RESOURCE_GROUP_NAME}
 echo "storage name: ${STORAGE_ACCOUNT_NAME}"
+# az storage blob copy start --account-name ${STORAGE_ACCOUNT_NAME} --destination-blob 

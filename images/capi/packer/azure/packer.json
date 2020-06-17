@@ -33,8 +33,10 @@
     "kubernetes_rpm_gpg_check": null,
     "kubernetes_container_registry": null,
     "existing_ansible_ssh_args": "{{env `ANSIBLE_SSH_ARGS`}}",
+    "cloud_environment_name": "Public",
     "reenable_public_repos": "true",
-    "remove_extra_repos": "false"
+    "remove_extra_repos": "false",
+    "photon_image_url": "http://dl.bintray.com/vmware/photon/3.0/Rev2/azure/photon-azure-3.0-9355405.vhd.tar.gz"
   },
   "builders": [
     {
@@ -53,6 +55,7 @@
       "capture_name_prefix": "capi-{{user `build_timestamp`}}",
       "storage_account": "{{user `storage_account_name`}}",
       "location": "{{user `azure_location`}}",
+      "cloud_environment_name": "{{user `cloud_environment_name`}}",
       "ssh_username": "packer",
       "azure_tags": {
         "build_timestamp": "{{user `build_timestamp`}}",
@@ -85,12 +88,37 @@
         ]
       },
       "location": "{{user `azure_location`}}",
+      "cloud_environment_name": "{{user `cloud_environment_name`}}",
       "ssh_username": "packer",
       "azure_tags": {
         "build_timestamp": "{{user `build_timestamp`}}",
         "distribution": "ubuntu",
         "distribution_release": "bionic",
         "distribution_version": "1804",
+        "kubernetes_version": "{{user `kubernetes_semver`}}"
+      }
+    },
+    {
+      "name": "vhd-photon-3",
+      "type": "azure-arm",
+      "os_type": "Linux",
+      "image_url": "{{user `photon_image_url`}}",
+      "subscription_id": "{{user `subscription_id`}}",
+      "client_id": "{{user `client_id`}}",
+      "client_secret": "{{user `client_secret`}}",
+      "vm_size": "{{user `vm_size`}}",
+      "resource_group_name": "{{user `resource_group_name`}}",
+      "build_resource_group_name": "{{user `resource_group_name`}}",
+      "capture_container_name": "{{user `capture_container_name`}}",
+      "capture_name_prefix": "capi-{{user `build_timestamp`}}",
+      "storage_account": "{{user `storage_account_name`}}",
+      "cloud_environment_name": "{{user `cloud_environment_name`}}",
+      "ssh_username": "packer",
+      "azure_tags": {
+        "build_timestamp": "{{user `build_timestamp`}}",
+        "distribution": "photon",
+        "distribution_release": "3",
+        "distribution_version": "3",
         "kubernetes_version": "{{user `kubernetes_semver`}}"
       }
     }
