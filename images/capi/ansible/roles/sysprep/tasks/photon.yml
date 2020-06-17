@@ -42,7 +42,7 @@
 - name: Remove tdnf package caches
   command: /usr/bin/tdnf -y clean all
 
-- name: Lock root account
-  user:
-    name: root
-    password_lock: yes
+# - name: Lock root account
+#   user:
+#     name: root
+#     password_lock: yes
