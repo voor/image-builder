@@ -10,7 +10,7 @@ export AZURE_LOCATION="${AZURE_LOCATION:-southcentralus}"
 az group create -n ${RESOURCE_GROUP_NAME} -l ${AZURE_LOCATION}
 echo "resource group name: ${RESOURCE_GROUP_NAME}"
 CREATE_TIME="$(date +%s)"
-export STORAGE_ACCOUNT_NAME="capi${CREATE_TIME}"
-az storage account create -n ${STORAGE_ACCOUNT_NAME} -g ${RESOURCE_GROUP_NAME}
+export STORAGE_ACCOUNT_NAME="photon3"
+# az storage account create -n ${STORAGE_ACCOUNT_NAME} -g ${RESOURCE_GROUP_NAME}
 echo "storage name: ${STORAGE_ACCOUNT_NAME}"
 # az storage blob copy start --account-name ${STORAGE_ACCOUNT_NAME} --destination-blob 
