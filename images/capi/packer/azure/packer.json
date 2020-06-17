@@ -36,7 +36,13 @@
     "cloud_environment_name": "Public",
     "reenable_public_repos": "true",
     "remove_extra_repos": "false",
-    "photon_image_url": "http://dl.bintray.com/vmware/photon/3.0/Rev2/azure/photon-azure-3.0-9355405.vhd.tar.gz"
+    "photon_image_url": "http://dl.bintray.com/vmware/photon/3.0/Rev2/azure/photon-azure-3.0-9355405.vhd.tar.gz",
+    "custom_role": "",
+    "custom_role_name": "",
+    "http_proxy": "",
+    "https_proxy": "",
+    "no_proxy": "",
+    "redhat_epel_rpm": "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm"
   },
   "builders": [
     {
