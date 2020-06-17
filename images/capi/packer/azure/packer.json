@@ -8,6 +8,7 @@
     "disable_public_repos": "false",
     "extra_debs": "",
     "extra_repos": "",
+    "extra_rpms": "",
     "azure_location": null,
     "vm_size": "",
     "build_timestamp": "{{timestamp}}",
@@ -36,7 +37,7 @@
     "cloud_environment_name": "Public",
     "reenable_public_repos": "true",
     "remove_extra_repos": "false",
-    "photon_image_url": "http://dl.bintray.com/vmware/photon/3.0/Rev2/azure/photon-azure-3.0-9355405.vhd.tar.gz",
+    "photon_image_url": "https://photon3.blob.core.windows.net/image/photon-azure-3.0-9355405.vhd",
     "custom_role": "",
     "custom_role_name": "",
     "http_proxy": "",
@@ -135,7 +136,8 @@
       "inline": [
         "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
         "sudo apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive apt-get -qqy install python python-pip"
-      ]
+      ],
+      "only": ["sig-ubuntu-1804", "vhd-ubuntu-1804"]
     },
     {
       "type": "ansible",
