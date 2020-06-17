@@ -15,11 +15,11 @@
 common_rpms:
 - ca-certificates
 - conntrack-tools
+- chrony
 - curl
 - ebtables
 - ntp
 - open-vm-tools
-- python2-pip
 - python-netifaces
 - python-requests
 - socat

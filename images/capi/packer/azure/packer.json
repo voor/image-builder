@@ -8,6 +8,7 @@
     "disable_public_repos": "false",
     "extra_debs": "",
     "extra_repos": "",
+    "extra_rpms": "",
     "azure_location": null,
     "vm_size": "",
     "build_timestamp": "{{timestamp}}",
@@ -33,8 +34,19 @@
     "kubernetes_rpm_gpg_check": null,
     "kubernetes_container_registry": null,
     "existing_ansible_ssh_args": "{{env `ANSIBLE_SSH_ARGS`}}",
+    "cloud_environment_name": "Public",
     "reenable_public_repos": "true",
-    "remove_extra_repos": "false"
+    "remove_extra_repos": "false",
+    "custom_role": "",
+    "custom_role_name": "",
+    "http_proxy": "",
+    "https_proxy": "",
+    "headless": "true",
+    "no_proxy": "",
+    "redhat_epel_rpm": "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm",
+    "build_version": "{{user `build_name`}}-kube-{{user `kubernetes_semver`}}",
+    "output_dir": "./output/{{user `build_version`}}"
+
   },
   "builders": [
     {
@@ -53,6 +65,7 @@
       "capture_name_prefix": "capi-{{user `build_timestamp`}}",
       "storage_account": "{{user `storage_account_name`}}",
       "location": "{{user `azure_location`}}",
+      "cloud_environment_name": "{{user `cloud_environment_name`}}",
       "ssh_username": "packer",
       "azure_tags": {
         "build_timestamp": "{{user `build_timestamp`}}",
@@ -85,6 +98,7 @@
         ]
       },
       "location": "{{user `azure_location`}}",
+      "cloud_environment_name": "{{user `cloud_environment_name`}}",
       "ssh_username": "packer",
       "azure_tags": {
         "build_timestamp": "{{user `build_timestamp`}}",
@@ -93,6 +107,34 @@
         "distribution_version": "1804",
         "kubernetes_version": "{{user `kubernetes_semver`}}"
       }
+    },
+    {
+      "name": "vhd-centos-7",
+      "type": "qemu",
+      "headless": "{{user `headless`}}",
+      "iso_url": "{{user `iso_url`}}",
+      "iso_checksum": "{{user `iso_checksum`}}",
+      "iso_checksum_type": "{{user `iso_checksum_type`}}",
+      "output_directory": "{{user `output_dir`}}",
+      "cpus": 1,
+      "memory": 2048,
+      "disk_size": "4096M",
+      "format": "raw",
+      "accelerator": "kvm",
+      "ssh_username": "{{user `ssh_username`}}",
+      "ssh_password": "{{user `ssh_password`}}",
+      "ssh_timeout": "4h",
+      "vm_name": "{{user `build_version`}}",
+      "net_device": "virtio-net",
+      "disk_interface": "virtio",
+      "http_directory": "./packer/ova/linux/{{user `distro_name`}}/http/",
+      "boot_wait": "{{user `boot_wait`}}",
+      "boot_command": [
+        "{{user `boot_command_prefix`}}",
+        "http://{{ .HTTPIP }}:{{ .HTTPPort }}",
+        "{{user `boot_command_suffix`}}"
+      ],
+      "shutdown_command": "echo '{{user `ssh_password`}}' | sudo -S -E sh -c 'usermod -L {{user `ssh_username`}} && {{user `shutdown_command`}}'"
     }
   ],
   "provisioners": [
@@ -101,7 +143,8 @@
       "inline": [
         "while [ ! -f /var/lib/cloud/instance/boot-finished ]; do echo 'Waiting for cloud-init...'; sleep 1; done",
         "sudo apt-get -qq update && sudo DEBIAN_FRONTEND=noninteractive apt-get -qqy install python python-pip"
-      ]
+      ],
+      "only": ["sig-ubuntu-1804", "vhd-ubuntu-1804"]
     },
     {
       "type": "ansible",
@@ -115,8 +158,38 @@
         "--extra-vars",
         "{{user `ansible_common_vars`}}",
         "--extra-vars",
-        "{{user `ansible_extra_vars`}}"
+        "{{user `ansible_extra_vars`}}",
+        "--extra-vars",
+        "azure_local=True"
       ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "manifest",
+      "output": "{{user `output_dir`}}/packer-manifest.json",
+      "strip_path": true,
+      "custom_data": {
+        "build_name": "{{user `build_name`}}",
+        "build_timestamp": "{{user `build_timestamp`}}",
+        "build_date": "{{isotime}}",
+        "build_type": "node",
+        "containerd_version": "{{user `containerd_version`}}",
+        "custom_role": "{{user `custom_role`}}",
+        "kubernetes_cni_semver": "{{user `kubernetes_cni_semver`}}",
+        "kubernetes_semver": "{{user `kubernetes_semver`}}",
+        "kubernetes_source_type": "{{user `kubernetes_source_type`}}",
+        "os_name": "{{user `distro_name`}}"
+      }
+    },
+    {
+      "name": "vhd",
+      "type": "shell-local",
+      "inline": [
+        "cd {{user `output_dir`}}",
+        "../../hack/image-vhd-convert.sh {{user `output_dir`}} {{user `build_version`}} {{user `build_version`}}.vhd"
+      ],
+      "only": ["vhd-photon-3"]
     }
   ]
 }

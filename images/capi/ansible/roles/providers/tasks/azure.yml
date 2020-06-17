@@ -19,6 +19,40 @@
   vars:
     packages:
       - azure-cli
+  when: ansible_distribution == "Ubuntu" 
+
+- name: Add Microsoft signing key
+  rpm_key:
+    state: present
+    key: https://packages.microsoft.com/keys/microsoft.asc
+  when: ansible_os_family == "RedHat"
+
+- name: Add Azure CLI repository
+  yum_repository:
+    name: azure-cli
+    description: azure-cli
+    file: azure-cli
+    enabled: "{{disable_public_repos|bool}}"
+    baseurl: https://packages.microsoft.com/yumrepos/azure-cli
+    gpgcheck: yes
+    gpgkey: https://packages.microsoft.com/keys/microsoft.asc
+  when: ansible_os_family == "RedHat"
+
+- name: Refresh yum after repo addition
+  shell: 
+    cmd: yum updateinfo --enablerepo=azure-cli
+    warn: false
+
+- name: Ansible yum install azure-cli, python-pyasn1, and WALinuxAgent
+  yum:
+    name:
+    - python-pyasn1
+    - WALinuxAgent
+    - azure-cli
+    enablerepo: azure-cli
+    update_cache: yes
+    state: latest
+  when: ansible_os_family == "RedHat"
 
 - name: Ansible apt install chrony
   apt:
@@ -31,7 +65,14 @@
     path: /etc/chrony/chrony.conf
     create: yes
     line: refclock PHC /dev/ptp0 poll 3 dpoll -2 offset 0
-  when: ansible_distribution == "Ubuntu"  
+  when: ansible_distribution == "Ubuntu" 
+
+- name: Configure PTP
+  lineinfile:
+    path: /etc/chrony.conf
+    create: yes
+    line: refclock PHC /dev/ptp0 poll 3 dpoll -2 offset 0
+  when: ansible_os_family == "RedHat"
 
 - name: Ensure makestep parameter set as per Azure recommendation
   lineinfile:
@@ -47,3 +88,56 @@
     daemon_reload: yes
     name: chrony.service
   when: ansible_distribution == "Ubuntu"  
+
+- name: Ensure NETWORKING is set to yes
+  lineinfile:
+    path: /etc/sysconfig/network
+    regexp: '^NETWORKING='
+    line: NETWORKING=yes
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure HOSTNAME is set to localhost.localdomain
+  lineinfile:
+    path: /etc/sysconfig/network
+    regexp: '^HOSTNAME='
+    line: HOSTNAME=localhost.localdomain
+  when: ansible_os_family == "RedHat"
+
+- name: Make sure device file exists
+  template:
+    src: etc/sysconfig/network-scripts/ifcfg-eth0
+    dest: /etc/sysconfig/network-scripts/ifcfg-eth0
+    owner: root
+    group: root
+    mode: '0644'
+  when: ansible_os_family == "RedHat"
+
+- name: Modify udev rules to avoid generating static rules for the Ethernet interface(s). These rules can cause problems when cloning a virtual machine in Microsoft Azure or Hyper-V
+  file:
+    src: /dev/null
+    dest: /etc/udev/rules.d/75-persistent-net-generator.rules
+    state: link
+  when: ansible_os_family == "RedHat"
+
+- name: Include additional kernel parameters for Azure
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX='
+    line: GRUB_CMDLINE_LINUX="rootdelay=300 console=ttyS0 earlyprintk=ttyS0 net.ifnames=0"
+  notify: update grub config
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure the Hyper-V drivers are included in the initramfs
+  lineinfile:
+    path: /etc/dracut.conf
+    regexp: '^add_drivers+=yum'
+    line: add_drivers+=" hv_vmbus hv_netvsc hv_storvsc "
+  notify: rebuild initramfs
+  when: ansible_os_family == "RedHat"
+
+- name: enable waagent service
+  systemd:
+    name: waagent
+    enabled: yes
+    state: started
+  when: ansible_os_family == "RedHat"

@@ -144,6 +144,10 @@
   - { path: /var/log/kubernetes/audit.log, state: touch, mode: "0600" }
   when: kubernetes_semver != '' # Ensure audit log is not created for HA Proxy images, since this task is shared amongst build targets
 
+- name: Deprovision for Azure
+  shell: waagent -force -deprovision
+  when: azure_local|default(false)|bool == true
+  
 - name: Truncate shell history
   file:
     state: absent
@@ -151,3 +155,4 @@
   loop:
   - { path: /root/.bash_history }
   - { path: "/home/{{ ansible_env.SUDO_USER }}/.bash_history" }
+
