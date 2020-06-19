@@ -123,7 +123,15 @@
   lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX='
-    line: GRUB_CMDLINE_LINUX="rootdelay=300 console=ttyS0 earlyprintk=ttyS0 net.ifnames=0"
+    line: GRUB_CMDLINE_LINUX="rootdelay=300 rd.lvm.lv=centos/root spectre_v2=retpoline console=ttyS0 earlyprintk=ttyS0 net.ifnames=0 edd=off"
+  notify: update grub config
+  when: ansible_os_family == "RedHat"
+
+- name: Remove boot delay.
+  lineinfile:
+    path: /etc/default/grub
+    regexp: '^GRUB_TIMEOUT='
+    line: GRUB_TIMEOUT=0
   notify: update grub config
   when: ansible_os_family == "RedHat"
 
@@ -140,4 +148,5 @@
     name: waagent
     enabled: yes
     state: started
+  notify: waagent deprovision
   when: ansible_os_family == "RedHat"

@@ -26,18 +26,16 @@ set -o errexit
 set -o nounset
 set -o pipefail
 
-if [ "${#}" -lt "2" ]; then
-  echo "usage: ${0} BUILD_DIR VHDDISK" 1>&2
+if [ "${#}" -lt "3" ]; then
+  echo "usage: ${0} BUILD_DIR RAWDISK VHDDISK" 1>&2
   exit 1
 fi
 
 BUILD_DIR=$1
-VHDDISK=$2
-RAWDISK=$(basename -s .vhd -- ${VHDDISK})
+RAWDISK=$2
+VHDDISK=$3
 
 pushd ${BUILD_DIR}
-
-mv ${VHDDISK} ${RAWDISK}
 
 MB=$((1024*1024))
 size=$(qemu-img info -f raw --output json "$RAWDISK" | \
@@ -48,7 +46,6 @@ ROUNDED_SIZE=$(((($size+$MB-1)/$MB)*$MB))
 echo "Rounded Size = ${ROUNDED_SIZE}"
 
 qemu-img resize -f raw ${RAWDISK} ${ROUNDED_SIZE}
-qemu-img convert -f raw -o subformat=fixed,force_size \
-    -O vpc ${RAWDISK} ${VHDDISK}
-rm -rf ${RAWDISK}
+qemu-img convert -f raw -O vpc -o subformat=fixed,force_size ${RAWDISK} ${VHDDISK}
+# rm -rf ${RAWDISK}
 popd

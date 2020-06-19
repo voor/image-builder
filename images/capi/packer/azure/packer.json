@@ -121,7 +121,7 @@
       "ssh_username": "{{user `ssh_username`}}",
       "ssh_password": "{{user `ssh_password`}}",
       "ssh_timeout": "4h",
-      "vm_name": "{{user `build_version`}}.vhd",
+      "vm_name": "{{user `build_version`}}.raw",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
       "http_directory": "./packer/ova/linux/{{user `distro_name`}}/http/",
@@ -166,7 +166,7 @@
       "name": "vhd",
       "type": "shell-local",
       "inline": [
-        "./hack/image-vhd-convert.sh {{user `output_dir`}} {{user `build_version`}}.vhd"
+        "./hack/image-vhd-convert.sh {{user `output_dir`}} {{user `build_version`}}.raw {{user `build_version`}}.vhd"
       ],
       "only": ["vhd-centos-7"]
     },
