@@ -46,7 +46,6 @@
     "redhat_epel_rpm": "https://dl.fedoraproject.org/pub/epel/epel-release-latest-7.noarch.rpm",
     "build_version": "{{user `build_name`}}-kube-{{user `kubernetes_semver`}}",
     "output_dir": "./output/{{user `build_version`}}"
-
   },
   "builders": [
     {
@@ -93,9 +92,7 @@
         "gallery_name": "{{user `shared_image_gallery_name`}}",
         "image_name": "{{user `image_name`}}",
         "image_version": "0.3.{{user `build_timestamp`}}",
-        "replication_regions": [
-          "{{user `replication_regions`}}"
-        ]
+        "replication_regions": ["{{user `replication_regions`}}"]
       },
       "location": "{{user `azure_location`}}",
       "cloud_environment_name": "{{user `cloud_environment_name`}}",
@@ -117,14 +114,14 @@
       "iso_checksum_type": "{{user `iso_checksum_type`}}",
       "output_directory": "{{user `output_dir`}}",
       "cpus": 1,
-      "memory": 2048,
+      "memory": 4096,
       "disk_size": "4096M",
       "format": "raw",
       "accelerator": "kvm",
       "ssh_username": "{{user `ssh_username`}}",
       "ssh_password": "{{user `ssh_password`}}",
       "ssh_timeout": "4h",
-      "vm_name": "{{user `build_version`}}",
+      "vm_name": "{{user `build_version`}}.vhd",
       "net_device": "virtio-net",
       "disk_interface": "virtio",
       "http_directory": "./packer/ova/linux/{{user `distro_name`}}/http/",
@@ -166,6 +163,19 @@
   ],
   "post-processors": [
     {
+      "name": "vhd",
+      "type": "shell-local",
+      "inline": [
+        "./hack/image-vhd-convert.sh {{user `output_dir`}} {{user `build_version`}}.vhd"
+      ],
+      "only": ["vhd-centos-7"]
+    },
+    {
+      "type": "artifice",
+      "files": ["{{user `output_dir`}}/{{user `build_version`}}.vhd"],
+      "only": ["vhd-centos-7"]
+    },
+    {
       "type": "manifest",
       "output": "{{user `output_dir`}}/packer-manifest.json",
       "strip_path": true,
@@ -183,13 +193,10 @@
       }
     },
     {
-      "name": "vhd",
-      "type": "shell-local",
-      "inline": [
-        "cd {{user `output_dir`}}",
-        "../../hack/image-vhd-convert.sh {{user `output_dir`}} {{user `build_version`}} {{user `build_version`}}.vhd"
-      ],
-      "only": ["vhd-photon-3"]
+      "type": "checksum",
+      "checksum_types": ["md5", "sha256"],
+      "output": "{{user `output_dir`}}/{{user `build_version`}}.{{.ChecksumType}}",
+      "only": ["vhd-centos-7"]
     }
   ]
 }
