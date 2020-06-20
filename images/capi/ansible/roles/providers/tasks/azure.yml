@@ -49,6 +49,7 @@
     - python-pyasn1
     - WALinuxAgent
     - azure-cli
+    - hyperv-daemons
     enablerepo: azure-cli
     update_cache: yes
     state: latest
@@ -123,7 +124,7 @@
   lineinfile:
     path: /etc/default/grub
     regexp: '^GRUB_CMDLINE_LINUX='
-    line: GRUB_CMDLINE_LINUX="rootdelay=300 rd.lvm.lv=centos/root spectre_v2=retpoline console=ttyS0 earlyprintk=ttyS0 net.ifnames=0 edd=off"
+    line: GRUB_CMDLINE_LINUX="rootdelay=300 rd.lvm.lv=centos/root spectre_v2=retpoline console=ttyS0 earlyprintk=ttyS0 net.ifnames=0 edd=off modprobe.blacklist=floppy"
   notify: update grub config
   when: ansible_os_family == "RedHat"
 
@@ -135,11 +136,22 @@
   notify: update grub config
   when: ansible_os_family == "RedHat"
 
+- name: enable hyperv-daemons
+  systemd:
+    name: "{{ item }}"
+    enabled: yes
+    state: started
+  with_items:
+  - hypervfcopyd
+  - hypervkvpd
+  - hypervvssd
+  when: ansible_os_family == "RedHat"
+
 - name: Ensure the Hyper-V drivers are included in the initramfs
   lineinfile:
     path: /etc/dracut.conf
-    regexp: '^add_drivers+=yum'
-    line: add_drivers+=" hv_vmbus hv_netvsc hv_storvsc "
+    regexp: '^add_drivers+='
+    line: add_drivers+=" hv_vmbus hv_netvsc hv_storvsc nvme ena xen_blkfront xen_netfront mptbase mptscsih mptspi "
   notify: rebuild initramfs
   when: ansible_os_family == "RedHat"
 
@@ -148,5 +160,5 @@
     name: waagent
     enabled: yes
     state: started
-  notify: waagent deprovision
   when: ansible_os_family == "RedHat"
+

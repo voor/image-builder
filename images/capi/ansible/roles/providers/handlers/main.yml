@@ -5,7 +5,3 @@
 - name: rebuild initramfs
   shell: dracut -f -v
   when: ansible_os_family == "RedHat"
-
-- name: waagent deprovision
-  shell: waagent -deprovision+user
-  when: ansible_os_family == "RedHat"

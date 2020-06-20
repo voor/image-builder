@@ -162,41 +162,44 @@
     }
   ],
   "post-processors": [
-    {
-      "name": "vhd",
-      "type": "shell-local",
-      "inline": [
-        "./hack/image-vhd-convert.sh {{user `output_dir`}} {{user `build_version`}}.raw {{user `build_version`}}.vhd"
-      ],
-      "only": ["vhd-centos-7"]
-    },
-    {
-      "type": "artifice",
-      "files": ["{{user `output_dir`}}/{{user `build_version`}}.vhd"],
-      "only": ["vhd-centos-7"]
-    },
-    {
-      "type": "manifest",
-      "output": "{{user `output_dir`}}/packer-manifest.json",
-      "strip_path": true,
-      "custom_data": {
-        "build_name": "{{user `build_name`}}",
-        "build_timestamp": "{{user `build_timestamp`}}",
-        "build_date": "{{isotime}}",
-        "build_type": "node",
-        "containerd_version": "{{user `containerd_version`}}",
-        "custom_role": "{{user `custom_role`}}",
-        "kubernetes_cni_semver": "{{user `kubernetes_cni_semver`}}",
-        "kubernetes_semver": "{{user `kubernetes_semver`}}",
-        "kubernetes_source_type": "{{user `kubernetes_source_type`}}",
-        "os_name": "{{user `distro_name`}}"
+    [
+      {
+        "name": "vhd",
+        "type": "shell-local",
+        "inline": [
+          "./hack/image-vhd-convert.sh {{user `output_dir`}} {{user `build_version`}}.raw {{user `build_version`}}.vhd"
+        ],
+        "only": ["vhd-centos-7"]
+      },
+      {
+        "type": "artifice",
+        "keep_input_artifact": false,
+        "files": ["{{user `output_dir`}}/{{user `build_version`}}.vhd"],
+        "only": ["vhd-centos-7"]
+      },
+      {
+        "type": "manifest",
+        "output": "{{user `output_dir`}}/packer-manifest.json",
+        "strip_path": true,
+        "custom_data": {
+          "build_name": "{{user `build_name`}}",
+          "build_timestamp": "{{user `build_timestamp`}}",
+          "build_date": "{{isotime}}",
+          "build_type": "node",
+          "containerd_version": "{{user `containerd_version`}}",
+          "custom_role": "{{user `custom_role`}}",
+          "kubernetes_cni_semver": "{{user `kubernetes_cni_semver`}}",
+          "kubernetes_semver": "{{user `kubernetes_semver`}}",
+          "kubernetes_source_type": "{{user `kubernetes_source_type`}}",
+          "os_name": "{{user `distro_name`}}"
+        }
+      },
+      {
+        "type": "checksum",
+        "checksum_types": ["md5", "sha256"],
+        "output": "{{user `output_dir`}}/{{user `build_version`}}.{{.ChecksumType}}",
+        "only": ["vhd-centos-7"]
       }
-    },
-    {
-      "type": "checksum",
-      "checksum_types": ["md5", "sha256"],
-      "output": "{{user `output_dir`}}/{{user `build_version`}}.{{.ChecksumType}}",
-      "only": ["vhd-centos-7"]
-    }
+    ]
   ]
 }

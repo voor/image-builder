@@ -26,6 +26,7 @@
     name: '*'
     state: latest
     lock_timeout: 60
+  register: yum_update
 
 - name: install baseline dependencies
   yum:
