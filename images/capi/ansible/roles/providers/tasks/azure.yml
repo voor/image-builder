@@ -50,6 +50,12 @@
     - WALinuxAgent
     - azure-cli
     - hyperv-daemons
+    - iscsi-initiator-utils
+    - dmraid
+    - busybox
+    - lvm2
+    - cifs-utils
+    - cryptsetup
     enablerepo: azure-cli
     update_cache: yes
     state: latest

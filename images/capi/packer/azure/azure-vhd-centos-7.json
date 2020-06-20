@@ -13,5 +13,5 @@
   "boot_command_suffix": "/7/ks.cfg<enter><wait>",
   "ssh_username": "builder",
   "ssh_password": "builder",
-  "shutdown_command": "sys-unconfig && waagent -deprovision+user"
+  "shutdown_command": "waagent --force -deprovision+user && sys-unconfig"
 }
