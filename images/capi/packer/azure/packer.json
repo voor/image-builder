@@ -124,7 +124,7 @@
       "capture_name_prefix": "capi-{{user `build_timestamp`}}",
       "storage_account": "{{user `storage_account_name`}}",
       "cloud_environment_name": "{{user `cloud_environment_name`}}",
-      "ssh_username": "packer",
+      "ssh_username": "builder",
       "azure_tags": {
         "build_timestamp": "{{user `build_timestamp`}}",
         "distribution": "photon",
