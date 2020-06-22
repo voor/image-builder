@@ -42,5 +42,5 @@
 # - import_tasks: kubeadmpull.yml
 #   when: kubernetes_source_type == "pkg" and ecr != true
 
-- import_tasks: ecrpull.yml
-  when: kubernetes_source_type != "http" and ecr == true
+# - import_tasks: ecrpull.yml
+#   when: kubernetes_source_type != "http" and ecr == true
