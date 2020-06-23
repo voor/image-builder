@@ -12,6 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ---
+- name: Install Azure clients.
+  command: tdnf install {{ packages }} --nogpgcheck -y
+  vars:
+    packages: "python-pyasn1 WALinuxAgent"
+  when: ansible_os_family == "VMware Photon OS"
+
 - name: install Azure clients
   pip:
     executable: pip3
@@ -19,7 +25,7 @@
   vars:
     packages:
       - azure-cli
-  when: ansible_distribution == "Ubuntu" 
+  when: ansible_distribution == "Ubuntu" or ansible_os_family == "VMware Photon OS"
 
 - name: Add Microsoft signing key
   rpm_key:
@@ -36,12 +42,13 @@
     baseurl: https://packages.microsoft.com/yumrepos/azure-cli
     gpgcheck: "{{ ansible_os_family == 'RedHat'|bool }}"
     gpgkey: https://packages.microsoft.com/keys/microsoft.asc
-  when: ansible_os_family == "RedHat" or ansible_os_family == "VMware Photon OS"
+  when: ansible_os_family == "RedHat"
 
 - name: Refresh yum after repo addition
   shell: 
     cmd: yum updateinfo --enablerepo=azure-cli
     warn: false
+  when: ansible_os_family == "RedHat"
 
 - name: Ansible yum install azure-cli, python-pyasn1, and WALinuxAgent
   yum:
@@ -53,12 +60,6 @@
     update_cache: yes
     state: latest
   when: ansible_os_family == "RedHat"
-
-- name: Install Kubernetes
-  command: tdnf install {{ packages }} --nogpgcheck -y
-  vars:
-    packages: "python-pyasn1 WALinuxAgent azure-cli"
-  when: ansible_os_family == "VMware Photon OS"
 
 - name: Ansible apt install chrony
   apt:
@@ -117,6 +118,15 @@
     group: root
     mode: '0644'
   when: ansible_os_family == "RedHat"
+
+- name: Make sure device file exists
+  template:
+    src: etc/systemd/network/10-eth0.network.manual
+    dest: /etc/systemd/network/10-eth0.network.manual
+    owner: systemd-network
+    group: systemd-network
+    mode: '0644'
+  when: ansible_os_family == "VMware Photon OS"
 
 - name: Modify udev rules to avoid generating static rules for the Ethernet interface(s). These rules can cause problems when cloning a virtual machine in Microsoft Azure or Hyper-V
   file:
