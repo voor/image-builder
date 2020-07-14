@@ -48,7 +48,8 @@
     "snapshot_groups": "all",
     "snapshot_users": "",
     "subnet_id": "",
-    "vpc_id": ""
+    "vpc_id": "",
+    "volume_size": ""
   },
   "builders": [
     {
@@ -85,6 +86,7 @@
       "ssh_username": "{{user `ssh_username`}}",
       "vpc_id": "{{ user `vpc_id` }}",
       "subnet_id": "{{ user `subnet_id` }}",
+      "volume_size": "{{ user `volume_size` }}",
       "tags": {
         "build_date": "{{isotime}}",
         "build_timestamp": "{{user `build_timestamp`}}",
