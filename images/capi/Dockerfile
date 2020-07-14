@@ -17,7 +17,7 @@ FROM ubuntu:focal
 ENV PACKER_ARGS ''
 ENV PACKER_VAR_FILES ''
 
-RUN apt-get update && apt-get install -y apt-transport-https ca-certificates ansible curl wget git rsync vim jq unzip build-essential \
+RUN apt-get update && apt-get install -y apt-transport-https ca-certificates ansible=2.9.6+dfsg-1 curl wget git rsync vim jq unzip build-essential \
     && useradd -ms /bin/bash ansible \
     && curl -sL https://releases.hashicorp.com/packer/1.6.0/packer_1.6.0_linux_amd64.zip -o /tmp/packer.zip && unzip /tmp/packer.zip && mv packer /usr/local/bin/packer \
     && rm -rf /tmp/packer.zip \
