@@ -86,7 +86,6 @@
       "ssh_username": "{{user `ssh_username`}}",
       "vpc_id": "{{ user `vpc_id` }}",
       "subnet_id": "{{ user `subnet_id` }}",
-      "volume_size": "{{ user `volume_size` }}",
       "tags": {
         "build_date": "{{isotime}}",
         "build_timestamp": "{{user `build_timestamp`}}",
@@ -101,7 +100,7 @@
       },
       "ami_block_device_mappings": [
         {
-          "device_name": "/dev/xvda",
+          "device_name": "/dev/sda1",
           "volume_size": "{{ user `volume_size` }}",
           "volume_type": "gp2",
           "delete_on_termination": true
