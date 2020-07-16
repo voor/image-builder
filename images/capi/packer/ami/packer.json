@@ -98,7 +98,7 @@
         "kubernetes_version": "{{user `kubernetes_semver`}}",
         "source_ami": "{{user `source_ami`}}"
       },
-      "ami_block_device_mappings": [
+      "launch_block_device_mappings": [
         {
           "device_name": "/dev/sda1",
           "volume_size": "{{ user `volume_size` }}",
