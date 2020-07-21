@@ -14,13 +14,13 @@
 
 FROM ubuntu:focal
 
-ARG PASSED_IB_VERSION
-ARG ARCH
-
 RUN apt-get update && apt-get install -y apt-transport-https ca-certificates python3-pip curl wget git rsync vim unzip build-essential \
     && useradd -ms /bin/bash imagebuilder \
     && apt-get purge --auto-remove -y \
     && rm -rf /var/lib/apt/lists/*
+
+ARG ARCH
+ARG PASSED_IB_VERSION
 
 COPY . /home/imagebuilder
 
