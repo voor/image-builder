@@ -106,15 +106,6 @@ ifeq (1,$(strip $(FOREGROUND)))
 PACKER_FLAGS += -var="headless=false"
 endif
 
-# If AMI_PRIVATE=1 then AMI_GROUPS will not be set to all, this is to workaround
-# a problem with packer only accepting one variable for ami_groups which makes it
-# impossible to override.
-ifeq (1,$(strip $(AMI_PRIVATE)))
-unexport AMI_GROUPS
-else
-export AMI_GROUPS ?= "all"
-endif
-
 # We want the var files passed to Packer to have a specific order, because the
 # precenence of the variables they contain depends on the order. Files listed
 # later on the CLI have higher precedence. We want the common var files found in
@@ -309,6 +300,10 @@ clean-packer-cache: ## Removes the packer cache
 clean-packer-cache:
 	rm -fr packer_cache/*
 
+## --------------------------------------
+## Docker targets
+## --------------------------------------
+##@ Docker
 .PHONY: docker-build
 docker-build: ## Build the docker image for controller-manager
 	docker build --pull --build-arg PASSED_IB_VERSION=$(IB_VERSION) --build-arg ARCH=$(ARCH) . -t $(CONTROLLER_IMG)-$(ARCH):$(TAG)
